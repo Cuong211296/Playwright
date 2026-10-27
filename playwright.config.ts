@@ -29,7 +29,10 @@ export default defineConfig({
     // baseURL: 'http://localhost:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    // trace: 'on-first-retry',
+    /* Giữ trace khi test fail */
+    trace: 'retain-on-failure',
+    // video: 'retain-on-failure',
     headless: false,
     extraHTTPHeaders: {
       'ngrok-skip-browser-warning': 'true',
@@ -49,6 +52,16 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
+      testIgnore: /purchase\//,
+    },
+    {
+      // Giỏ hàng / đặt hàng / xử lý đơn: dùng chung 1 account customer = chung 1 giỏ hàng
+      // -> chạy lần lượt từng test (workers: 1) để các test không làm hỏng giỏ của nhau
+      name: 'purchase',
+      testMatch: /purchase\/.*\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/customer.json' },
+      dependencies: ['setup'],
+      workers: 1,
     },
 
     // {

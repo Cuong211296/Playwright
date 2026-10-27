@@ -23,7 +23,8 @@ export class HomePage {
     this.viewCollectionButton = page.getByRole('button', { name: 'Xem bộ sưu tập' });
 
     this.searchBox = page.getByRole('searchbox', { name: 'Tìm sản phẩm' });
-    this.productCount = page.getByText(/^\d+ sản phẩm$/);
+    // "15 sản phẩm" hoặc khi tìm kiếm: "1 sản phẩm cho “abc”"
+    this.productCount = page.getByText(/^\d+ sản phẩm/);
     this.productItems = page.getByRole('tabpanel').getByRole('listitem');
     this.emptyState = page.getByRole('heading', { name: 'Không tìm thấy sản phẩm phù hợp' });
     this.showAllButton = page.getByRole('button', { name: 'Xem tất cả sản phẩm' });
@@ -38,7 +39,11 @@ export class HomePage {
   }
 
   productCard(name: string) {
-    return this.productItems.filter({ hasText: name });
+    return this.productItems.filter({ has: this.page.getByRole('heading', { name, exact: true }) });
+  }
+
+  async openProduct(name: string) {
+    await this.productCard(name).getByRole('link').click();
   }
 
   async selectCategory(name: string) {
